@@ -1,29 +1,27 @@
-interface Category {
-  id: number;  // number, correspondant à l'ID de la catégorie
-  name: string;  // nom de la catégorie
-}
-
 interface CategoryFilterProps {
-  categories: Category[];  // Liste des catégories disponibles
-  onFilterChange: (categoryId: number) => void;  // Fonction appelée lors du changement de filtre
+  categories: { id: number; name: string }[]; // Liste des catégories avec id et nom
+  onFilterChange: (categoryName: string | null) => void; // Fonction de callback pour filtrer par nom de catégorie
 }
 
-export default function CategoryFilter({ categories, onFilterChange }: CategoryFilterProps) {
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCategoryId = Number(e.target.value);
-    onFilterChange(selectedCategoryId);
-  };
-
+export default function CategoryFilter({
+  categories,
+  onFilterChange,
+}: CategoryFilterProps) {
   return (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700">Filtrer par catégorie</label>
+    <div>
+      <label className="block text-sm font-medium text-white">
+        Filtrer par catégorie
+      </label>
       <select
-        onChange={handleCategoryChange}
-        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        onChange={(e) => onFilterChange(e.target.value || null)} // Appeler la fonction avec le nom de la catégorie ou null si "toutes les catégories" est sélectionnée
+        className="border rounded px-4 py-2 text-gray-700"
       >
-        <option value={0}>Toutes les catégories</option>
+        <option value="">Toutes les catégories</option>{" "}
+        {/* Option pour ne filtrer par aucune catégorie */}
         {categories.map((category) => (
-          <option key={category.id} value={category.id}>
+          <option key={category.id} value={category.name}>
+            {" "}
+            {/* Utiliser le nom de la catégorie dans la valeur */}
             {category.name}
           </option>
         ))}

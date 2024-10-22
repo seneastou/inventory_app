@@ -1,30 +1,52 @@
-interface Product {
-  id: number;  
+export interface Product {
+  id: number;
   name: string;
   description: string;
   price: number;
-  inStock: boolean;
-  categoryId: number; 
-  userId: number;  
+  instock: boolean;
+  categoryname: string; // Ajout du nom de la catégorie
+  userid: number;
+  createdat: Date; // Ajout de la date de création
 }
-
 interface ProductCardProps {
   product: Product;
   onEdit: (product: Product) => void;
   onDelete: (id: number) => void;
 }
 
-export default function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onEdit,
+  onDelete,
+}: ProductCardProps) {
   return (
-    <div className="border p-4 rounded-lg shadow-lg bg-white">
+    <div className="border p-4 rounded-lg text-center shadow-lg bg-white text-gray-700">
       <h2 className="text-lg font-bold">{product.name}</h2>
       <p className="text-gray-600">{product.description}</p>
       <p className="font-semibold">Prix: {product.price}€</p>
-      <p className="font-semibold">Catégorie ID: {product.categoryId}</p>
-      <p className="font-semibold">Propriétaire (User ID): {product.userId}</p>
-      <p className={`text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
-        {product.inStock ? 'En stock' : 'Rupture de stock'}
+
+      {/* Affichage du nom de la catégorie */}
+      <p className="font-semibold">
+        Catégorie: {product.categoryname || "Non spécifiée"}
       </p>
+
+      {/* Affichage de l'ID du propriétaire */}
+      <p className="font-semibold">User ID: {product.userid}</p>
+
+      {/* Affichage de la disponibilité du produit */}
+      <p
+        className={`text-sm ${
+          product.instock ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {product.instock ? "En stock" : "Rupture de stock"}
+      </p>
+
+      {/* Affichage de la date de création */}
+      <p className="text-sm text-gray-500">
+        Créé le : {new Date(product.createdat).toLocaleDateString()}
+      </p>
+
       <div className="mt-4 flex justify-between">
         <button
           onClick={() => onEdit(product)}
