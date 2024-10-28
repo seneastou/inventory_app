@@ -66,31 +66,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Méthode PUT - Modifier un utilisateur
-export async function PUT(req: NextRequest) {
-  const body = await req.json();
-  const { id, name, email, role } = body;
-
-  if (!id || !name || !email || !role) {
-    return NextResponse.json(
-      { error: "Tous les champs sont obligatoires" },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const result = await pool.query(
-      "UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4 RETURNING *",
-      [name, email, role, id]
-    );
-    return NextResponse.json(result.rows[0], { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Erreur lors de la modification de l'utilisateur" },
-      { status: 500 }
-    );
-  }
-}
-
-
-
