@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useEffect} from "react";
 import UserList from "../components/user/UserList"; // Importer le composant UserList
 import { useUser } from "../../context/UserContext"; // Utiliser le UserContext
 import { useUsers } from "../hooks/useUsers"; // Utiliser le hook useUsers pour créer un utilisateur
+
 
 interface User {
   id: number;
@@ -12,8 +13,8 @@ interface User {
 }
 
 export default function UserManagementPage() {
-  const { user, setUser } = useUser(); // Utiliser le UserContext pour gérer l'utilisateur authentifié
-  const { addUser } = useUsers(); // Utiliser le hook useUsers pour ajouter des utilisateurs
+  const { setUser } = useUser(); // Utiliser le UserContext pour gérer l'utilisateur authentifié
+  const { addUser, fetchUsers, users, deleteUser } = useUsers(); // Utiliser le hook useUsers pour ajouter et récupérer les utilisateurs
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "user">("user");
@@ -23,15 +24,30 @@ export default function UserManagementPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    fetchUsers(); // Récupérer les utilisateurs lors du montage
+  }, []);
+
   // Gérer l'ajout d'un nouvel utilisateur
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const newUser = { name, email, role };
-    await addUser(newUser); // Ajouter un utilisateur avec le hook
-    setName("");
-    setEmail("");
-    setRole("user");
+  
+    try {
+      const createdUser = await addUser(newUser); // Ajouter l'utilisateur via l'API
+  
+      if (createdUser) {
+        console.log("Utilisateur créé avec succès:", createdUser);
+        await fetchUsers(); // Mettre à jour la liste des utilisateurs
+      }
+  
+      setName("");
+      setEmail("");
+      setRole("user");
+    } catch (error) {
+      console.error("Erreur lors de la création de l'utilisateur:", error);
+    }
   };
 
   const handleUserClick = (user: User) => {
@@ -66,9 +82,7 @@ export default function UserManagementPage() {
         {/* Formulaire pour ajouter un utilisateur */}
         <form onSubmit={handleCreateUser} className="mb-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Nom
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Nom</label>
             <input
               type="text"
               value={name}
@@ -78,9 +92,7 @@ export default function UserManagementPage() {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               value={email}
@@ -90,9 +102,7 @@ export default function UserManagementPage() {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Rôle
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Rôle</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as "admin" | "user")}
@@ -111,7 +121,7 @@ export default function UserManagementPage() {
         </form>
 
         {/* Composant pour afficher la liste des utilisateurs */}
-        <UserList onUserClick={handleUserClick} />
+        <UserList onUserClick={handleUserClick} users={users} onDeleteUser={deleteUser} />
 
         {/* Popup pour l'authentification par email */}
         {showPopup && (
@@ -122,9 +132,7 @@ export default function UserManagementPage() {
               </h2>
               <form onSubmit={handleEmailSubmit}>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
                   <input
                     type="email"
                     value={emailInput}
@@ -133,9 +141,7 @@ export default function UserManagementPage() {
                     className="mt-1 block w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                   />
                 </div>
-                {errorMessage && (
-                  <p className="text-red-500 mb-4">{errorMessage}</p>
-                )}
+                {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
                 <button
                   type="submit"
                   className="bg-green-500 text-white py-2 px-4 rounded-md"

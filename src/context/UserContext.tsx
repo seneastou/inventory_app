@@ -21,6 +21,7 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// Hook personnalisé pour utiliser le contexte utilisateur
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
@@ -29,30 +30,28 @@ export const useUser = () => {
   return context;
 };
 
+// Provider pour fournir le contexte utilisateur à l'application
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Charger l'utilisateur depuis le back-end au montage du composant
+  // Charger l'utilisateur depuis l'API au montage du composant
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/auth/me"); // Assurez-vous d'avoir une route d'API pour récupérer l'utilisateur actuel
+        const response = await fetch("http://localhost:3000/api/auth/me"); // Assurez-vous que cette route existe
         if (response.ok) {
           const userData = await response.json();
-          setUser(userData);
+          setUser(userData); // Mettre à jour l'utilisateur dans l'état
         } else {
-          setUser(null); // Pas d'utilisateur connecté
+          setUser(null); // Aucun utilisateur connecté
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération de l'utilisateur :",
-          error
-        );
-        setUser(null);
+        console.error("Erreur lors de la récupération de l'utilisateur :", error);
+        setUser(null); // Mettre à jour l'état en cas d'erreur
       }
     };
 
-    fetchCurrentUser();
+    fetchCurrentUser(); // Appel au backend pour récupérer l'utilisateur
   }, []);
 
   return (
@@ -62,4 +61,4 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default useContext;
+export default UserProvider;

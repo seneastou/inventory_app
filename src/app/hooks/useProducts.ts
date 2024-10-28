@@ -23,18 +23,21 @@ export function useProducts() {
     setLoading(true);
     try {
       const res = await fetch("http://localhost:3000/api/products");
-      const data = await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        
+        const productsWithDate = data.map((product: any) => ({
+          ...product,
+          createdat: new Date(product.createdat), // Utiliser `createdat`
+        }));
 
-      // Conversion de 'createdAt' de string à Date pour chaque produit
-      const productsWithDate = data.map((product: any) => ({
-        ...product,
-        createdAt: new Date(product.createdAt), // Conversion ici
-      }));
-
-      if (Array.isArray(productsWithDate)) {
-        setProducts(productsWithDate);
+        if (Array.isArray(productsWithDate)) {
+          setProducts(productsWithDate);
+        } else {
+          setError("La réponse de l'API des produits n'est pas un tableau");
+        }
       } else {
-        setError("La réponse de l'API des produits n'est pas un tableau");
+        setError("Erreur lors de la récupération des produits");
       }
     } catch (err) {
       setError("Erreur lors de la récupération des produits");
@@ -68,9 +71,10 @@ export function useProducts() {
   };
 
   // Mettre à jour un produit
-  const updateProduct = async (product: Product) => {
+  const updateProduct = async (product: Omit<Product, "createdat">) => {
     setLoading(true);
     try {
+      
       const res = await fetch(
         `http://localhost:3000/api/products/${product.id}`,
         {
@@ -101,7 +105,7 @@ export function useProducts() {
         method: "DELETE",
       });
       if (res.ok) {
-        fetchProducts(); // Recharger les produits après la suppression
+        setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
       } else {
         setError("Erreur lors de la suppression du produit");
       }

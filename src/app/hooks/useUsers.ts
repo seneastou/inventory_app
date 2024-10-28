@@ -19,6 +19,7 @@ export function useUsers() {
     try {
       const res = await fetch("http://localhost:3000/api/users");
       const data = await res.json();
+      console.log("Utilisateurs récupérés :", data);
       setUsers(data);
       setError(null);
     } catch (err) {
@@ -39,13 +40,18 @@ export function useUsers() {
         },
         body: JSON.stringify(user),
       });
+      
       if (res.ok) {
-        await fetchUsers(); // Recharger les utilisateurs après ajout
+        const createdUser = await res.json(); // Récupérer l'utilisateur créé à partir de la réponse
+        setUsers([...users, createdUser]); // Ajouter l'utilisateur à la liste des utilisateurs
+        return createdUser;
       } else {
         setError("Erreur lors de l'ajout de l'utilisateur");
+        return null;
       }
     } catch (err) {
       setError("Erreur lors de l'ajout de l'utilisateur");
+      return null;
     } finally {
       setLoading(false);
     }
@@ -63,7 +69,7 @@ export function useUsers() {
         body: JSON.stringify(user),
       });
       if (res.ok) {
-        await fetchUsers(); // Recharger les utilisateurs après modification
+        setUsers(users.map((u) => (u.id === user.id ? user : u)));
       } else {
         setError("Erreur lors de la modification de l'utilisateur");
       }
@@ -75,10 +81,10 @@ export function useUsers() {
   };
 
   // Supprimer un utilisateur
-  const deleteUser = async (id: string) => {
+  const deleteUser = async (id: number) => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/users", {
+      const res = await fetch(`http://localhost:3000/api/users/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -86,7 +92,7 @@ export function useUsers() {
         body: JSON.stringify({ id }),
       });
       if (res.ok) {
-        await fetchUsers(); // Recharger les utilisateurs après suppression
+        setUsers(users.filter((u) => u.id !== id));
       } else {
         setError("Erreur lors de la suppression de l'utilisateur");
       }
@@ -106,6 +112,7 @@ export function useUsers() {
     addUser,
     updateUser,
     deleteUser,
+    fetchUsers,
     loading,
     error,
   };

@@ -1,26 +1,27 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Product } from "./ProductCard";
-import { useUsers } from "../../hooks/useUsers";
 import { useUser } from "../../../context/UserContext"; // Assurez-vous que ce contexte utilisateur est bien configuré
 
 interface ProductFormProps {
-  onSubmit: (product: Omit<Product, "id" | "createdat">) => void; // userId sera ajouté automatiquement
+  onSubmit: (product: Omit<Product, "createdat">) => void;
   categories: { id: number; name: string }[];
   addCategory: (name: string) => Promise<{ id: number; name: string } | null>;
+  initialProduct?: Product; // Ajoutez cette propriété pour accepter un produit prérempli
 }
 
 export default function ProductForm({
   onSubmit,
   categories,
   addCategory,
+  initialProduct, // Produit initial (pour l'édition)
 }: ProductFormProps) {
   const { user } = useUser(); // Hook pour récupérer l'utilisateur connecté
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
-  const [categoryName, setCategoryName] = useState<string | null>(null); // Utiliser le nom de la catégorie
-  const [instock, setInStock] = useState(false);
+  const [name, setName] = useState(initialProduct?.name || ""); // Utilisez les données initiales si disponibles
+  const [description, setDescription] = useState(initialProduct?.description || "");
+  const [price, setPrice] = useState(initialProduct?.price || 0);
+  const [categoryName, setCategoryName] = useState<string | null>(initialProduct?.categoryname || null);
+  const [instock, setInStock] = useState(initialProduct?.instock || false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
@@ -29,7 +30,6 @@ export default function ProductForm({
 
     let finalCategoryName = categoryName;
 
-    // Si l'utilisateur crée une nouvelle catégorie
     if (isCreatingCategory && newCategoryName) {
       try {
         const newCategory = await addCategory(newCategoryName);
@@ -37,7 +37,7 @@ export default function ProductForm({
           alert("Erreur lors de la création de la catégorie");
           return;
         }
-        finalCategoryName = newCategory.name; // Utiliser le nom de la nouvelle catégorie
+        finalCategoryName = newCategory.name;
       } catch (error) {
         console.error("Erreur lors de la création de la catégorie", error);
         return;
@@ -49,33 +49,29 @@ export default function ProductForm({
       return;
     }
 
-    // Vérifier que l'utilisateur est bien connecté avant de soumettre le produit
     if (!user) {
-      alert(
-        "Aucun utilisateur connecté. Veuillez vous connecter pour créer un produit."
-      );
+      alert("Aucun utilisateur connecté. Veuillez vous connecter pour créer un produit.");
       return;
     }
 
-    // Créer le nouvel objet produit avec finalCategoryName au lieu de category_id
-    const newProduct = {
+    const updatedProduct = {
+      id: initialProduct?.id ?? 0, // Include the id if it exists, otherwise default to 0
       name,
       description,
       price,
-      categoryname: finalCategoryName, // Utiliser le nom de la catégorie
+      categoryname: finalCategoryName,
       instock,
       userid: user.id,
     };
 
-    onSubmit(newProduct); // Envoyer le produit avec le nom de la catégorie
+    onSubmit(updatedProduct); // Envoyer le produit avec les données mises à jour
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Les champs du formulaire sont préremplis grâce aux valeurs initiales */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Nom du produit
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Nom du produit</label>
         <input
           type="text"
           value={name}
@@ -86,9 +82,7 @@ export default function ProductForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -109,9 +103,7 @@ export default function ProductForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Catégorie
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Catégorie</label>
         <select
           value={isCreatingCategory ? "new" : categoryName ?? ""}
           onChange={(e) => {
@@ -139,9 +131,7 @@ export default function ProductForm({
 
       {isCreatingCategory && (
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Nouvelle catégorie
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Nouvelle catégorie</label>
           <input
             type="text"
             value={newCategoryName}
@@ -159,16 +149,14 @@ export default function ProductForm({
           onChange={(e) => setInStock(e.target.checked)}
           className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         />
-        <label className="ml-2 block text-sm font-medium text-gray-700">
-          Disponible en stock
-        </label>
+        <label className="ml-2 block text-sm font-medium text-gray-700">Disponible en stock</label>
       </div>
 
       <button
         type="submit"
         className="w-full bg-indigo-600 text-white py-2 rounded-md shadow hover:bg-indigo-700"
       >
-        Ajouter le produit
+        Sauvegarder
       </button>
     </form>
   );

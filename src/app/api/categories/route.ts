@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 
+
 // Configurer la connexion à PostgreSQL
 const pool = new Pool({
   user: "postgres",
@@ -104,25 +105,24 @@ export async function PUT(req: NextRequest) {
 }
 
 // Méthode DELETE - Supprimer une catégorie
-export async function DELETE(req: NextRequest) {
-  // Récupérer les paramètres de la requête (searchParams)
-  const searchParams = req.nextUrl.searchParams;
-  const id = searchParams.get("id"); // Récupérer l'ID dans l'URL ?id=5
+// export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+//   const { id } = params;
 
-  if (!id) {
-    return NextResponse.json({ error: "ID manquant" }, { status: 400 });
-  }
 
-  try {
-    await pool.query("DELETE FROM categories WHERE id = $1", [id]);
-    return NextResponse.json(
-      { message: "Catégorie supprimé avec succès" },
-      { status: 204 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression du produit" },
-      { status: 500 }
-    );
-  }
-}
+//   if (!id) {
+//     return NextResponse.json({ error: "ID manquant" }, { status: 400 });
+//   }
+
+//   try {
+//     await pool.query("DELETE FROM categories WHERE id = $1", [id]);
+//     return NextResponse.json(
+//       { message: "Catégorie supprimé avec succès" },
+//       { status: 204 }
+//     );
+//   } catch (error) {
+//     return NextResponse.json(
+//       { error: "Erreur lors de la suppression de la catégorie" },
+//       { status: 500 }
+//     );
+//   }
+// }

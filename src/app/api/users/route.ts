@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     if (userExist.rows.length > 0) {
       // L'utilisateur existe déjà, renvoyer ses informations
-      return NextResponse.json(userExist.rows[0], { status: 200 });
+      return NextResponse.json(userExist.rows[0], { status: 201 });
     }
 
     // Si l'utilisateur n'existe pas, ajouter un nouvel utilisateur
@@ -92,25 +92,5 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// Méthode DELETE - Supprimer un utilisateur
-export async function DELETE(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get("id");
 
-  if (!id) {
-    return NextResponse.json(
-      { error: "L'ID de l'utilisateur est obligatoire" },
-      { status: 400 }
-    );
-  }
 
-  try {
-    await pool.query("DELETE FROM users WHERE id = $1", [id]);
-    return NextResponse.json({}, { status: 204 });
-  } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur :", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression de l'utilisateur" },
-      { status: 500 }
-    );
-  }
-}

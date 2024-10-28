@@ -103,8 +103,9 @@ export default function ProductPage() {
         {Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
           <ProductList
             products={filteredProducts}
-            onEdit={() => {}}
-            onDelete={() => {}}
+            onDelete={(id: number) => {
+              setFilteredProducts(filteredProducts.filter(product => product.id !== id));
+            }} 
           />
         ) : (
           <p>Aucun produit disponible.</p>

@@ -11,10 +11,12 @@ interface User {
 
 interface UserListProps {
   onUserClick: (user: User) => void;
+  users: User[];
+  onDeleteUser: (id: number) => Promise<void>;
 }
 
-export default function UserList({ onUserClick }: UserListProps) {
-  const { users, updateUser, deleteUser, loading, error } = useUsers();
+export default function UserList({ onUserClick, users, onDeleteUser}: UserListProps) {
+  const { updateUser, loading, error } = useUsers(); 
   const [role, setRole] = useState<{ [key: number]: "admin" | "user" }>({});
 
   // Gérer le changement de rôle d'un utilisateur
@@ -28,13 +30,23 @@ export default function UserList({ onUserClick }: UserListProps) {
   // Sauvegarder le rôle modifié
   const handleSubmitRoleChange = async (user: User) => {
     const updatedUser = { ...user, role: role[user.id] || user.role };
-    await updateUser(updatedUser);
+    try {
+      await updateUser(updatedUser);
+      alert("Rôle mis à jour avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du rôle :", error);
+    }
   };
 
   // Supprimer un utilisateur
   const handleDeleteUser = async (user: User) => {
-    await deleteUser(user.id.toString());
-  };
+    try {
+      await onDeleteUser(user.id);
+      alert("Utilisateur supprimé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'utilisateur :", error);
+    }
+  }; 
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
