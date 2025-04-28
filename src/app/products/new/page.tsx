@@ -26,7 +26,7 @@ export default function NewProductPage() {
   }, []);
 
   const handleSubmit = async (
-    newProduct: Omit<Product, "id" | "createdat">
+    newProduct: Omit<Product, "id" | "createdAt" | "userId"> 
   ) => {
     try {
       if (!user) {
@@ -34,7 +34,7 @@ export default function NewProductPage() {
         return;
       }
 
-      const productWithUser = { ...newProduct, userId: user.id }; // Ajouter userId
+      const productWithUser = { ...newProduct, userId: String(user.id), }; // Ajouter userId
       await addProduct(productWithUser);
 
       // Rediriger vers la page des produits après l'ajout réussi
@@ -62,5 +62,5 @@ export default function NewProductPage() {
         />
       </div>
     </main>
-  );
+  ); 
 }

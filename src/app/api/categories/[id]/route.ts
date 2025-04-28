@@ -4,11 +4,8 @@ import { Pool } from "pg";
 
 // Configurer la connexion à PostgreSQL
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "inventaire",
-  password: "scorpion",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 // Méthode GET - Récupérer une catégorie par son ID
 export async function GET(req: NextRequest) {
@@ -20,7 +17,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await pool.query("SELECT * FROM categories WHERE id = $1", [
+    const result = await pool.query('SELECT * FROM "Category" WHERE id = $1', [
       id,
     ]);
     if (result.rows.length === 0) {
@@ -52,7 +49,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const result = await pool.query(
-      "UPDATE categories SET name = $1 WHERE id = $2 RETURNING *",
+      'UPDATE "Category" SET name = $1 WHERE id = $2 RETURNING *',
       [name, id]
     );
     return NextResponse.json(result.rows[0], { status: 200 });
@@ -74,7 +71,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await pool.query("DELETE FROM categories WHERE id = $1", [id]);
+    await pool.query('DELETE FROM "Category" WHERE id = $1', [id]);
     return NextResponse.json(
       { message: "Catégorie supprimé avec succès" },
       { status: 204 }

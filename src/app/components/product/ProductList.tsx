@@ -1,50 +1,60 @@
-import ProductCard from "./ProductCard";
-import { useProducts } from '../../hooks/useProducts';
-
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  instock: boolean;
-  categoryname: string;
-  userid: number;
-  createdat: Date;
-}
+import { useState } from "react";
+import ProductCard, { Product } from "./ProductCard";
+import Pagination from "../pagination/Pagination"; 
+import { useProducts } from "../../hooks/useProducts";
+import toast from "react-hot-toast";
 
 interface ProductListProps {
-  products: Product[]; // Assurer que 'products' est supposé être un tableau
-  onDelete: (id: number) => void;
+  products: Product[];
+  onDelete: (id: string) => void;
 }
 
-export default function ProductList({products, onDelete}: ProductListProps) {
+const PRODUCTS_PER_PAGE = 9;
 
+export default function ProductList({ products, onDelete }: ProductListProps) {
   const { deleteProduct } = useProducts();
-  // Vérifie si 'products' est bien un tableau avant d'essayer d'utiliser .map()
-  if (!Array.isArray(products)) {
-    console.log(products);
-    return <p>Aucun produit disponible</p>;
-  }
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleDelete = async (productId: number) => {
+  const handleDelete = async (productId: string) => {
     try {
-      await deleteProduct(productId); // Appeler l'API pour supprimer le produit
-      onDelete(productId); 
-      console.log("Produit supprimé :", productId);
+      await deleteProduct(productId);
+      onDelete(productId);
     } catch (error) {
-      console.error("Erreur lors de la suppression du produit", error);
     }
   };
 
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = products.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+
+  if (products.length === 0) {
+    return (
+      <p className="text-center text-gray-500 mt-6">
+        Aucun produit trouvé pour le moment.
+      </p>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onDelete={handleDelete}
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {paginatedProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
+
+      {/* Pagination en dessous */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }

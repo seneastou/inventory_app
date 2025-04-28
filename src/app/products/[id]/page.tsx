@@ -60,14 +60,13 @@ export default function ProductDetailPage() {
       <p className="text-gray-600">{product.description}</p>
       <p className="text-lg font-semibold mt-4">Prix: {product.price.toString().replace(".", ",")}€</p>
       <p className="mt-2 font-semibold">
-        Catégorie: {product.categoryname || 'Non spécifiée'}
+        Catégorie: {product.categoryName || 'Non spécifiée'}
       </p>
-      <p className="mt-2 font-semibold">User ID: {product.userid}</p>
       <p className="mt-2 text-sm text-gray-500">
-        Créé le: {new Date(product.createdat).toLocaleDateString()}
+        Créé le: {new Date(product.createdAt).toLocaleDateString()}
       </p>
-      <p className={`mt-4 text-sm ${product.instock ? 'text-green-600' : 'text-red-600'}`}>
-        {product.instock ? 'En stock' : 'Rupture de stock'}
+      <p className={`mt-4 text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
+        {product.inStock ? 'En stock' : 'Rupture de stock'}
       </p>
 
       <div className="mt-6">

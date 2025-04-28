@@ -1,64 +1,86 @@
+import { FiTag, FiBox, FiCalendar, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
-  instock: boolean;
-  categoryname: string; // Ajout du nom de la catégorie
-  userid: number;
-  createdat: Date; // Ajout de la date de création
+  inStock: boolean;
+  categoryName: string;
+  createdAt: string;
 }
 
 interface ProductCardProps {
   product: Product;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function ProductCard({
-  product,
-  onDelete,
-}: ProductCardProps) {
+export default function ProductCard({ product, onDelete }: ProductCardProps) {
   return (
-    <div className="border p-4 rounded-lg text-center shadow-lg bg-white text-gray-700">
-      <Link href={`/products/${product.id}`} className="text-lg font-bold">
-        {product.name}
-      </Link>
-      <p className="text-gray-600">{product.description}</p>
-      <p className="font-semibold">Prix: {product.price.toString().replace(".", ",")}€</p>
-
-      {/* Affichage du nom de la catégorie */}
-      <p className="font-semibold">
-        Catégorie: {product.categoryname || "Non spécifiée"}
-      </p>
-
-      {/* Affichage de l'ID du propriétaire */}
-      <p className="font-semibold">User ID: {product.userid}</p>
-
-      {/* Affichage de la disponibilité du produit */}
-      <p
-        className={`text-sm ${
-          product.instock ? "text-green-600" : "text-red-600"
-        }`}
+    <div className="relative group">
+      <Link
+        href={`/products/${product.id}`}
+        className="absolute inset-0 z-10"
       >
-        {product.instock ? "En stock" : "Rupture de stock"}
-      </p>
+        <span className="sr-only">Voir le produit</span>
+      </Link>
 
-      {/* Affichage de la date de création */}
-      <p className="text-sm text-gray-500">
-        Créé le : {new Date(product.createdat).toLocaleDateString()}
-      </p>
+      <div className="bg-white shadow-xl rounded-2xl p-6 text-gray-800 space-y-4 hover:shadow-2xl transition-shadow duration-300">
+        <h3 className="text-xl font-bold group-hover:underline">
+          {product.name}
+        </h3>
 
-      <div className="mt-4 flex justify-center">
-        <button
-          onClick={() => onDelete(product.id)}
-          className="bg-red-500 text-white py-1 px-4 rounded hover:bg-red-600"
+        <p className="text-gray-600 text-sm">{product.description}</p>
+
+        <div className="flex items-center gap-2 text-sm">
+  <FiTag />
+  <span className="font-medium">
+    Prix : {product.price.toFixed(2).replace(".", ",")} €
+  </span>
+</div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <FiBox />
+          <span className="font-medium">
+            Catégorie : {product.categoryName || "Non spécifiée"}
+          </span>
+        </div>
+
+        <div
+          className={`text-sm font-medium ${
+            product.inStock ? "text-green-600" : "text-red-600"
+          }`}
         >
+          {product.inStock ? "✔ En stock" : "❌ Rupture de stock"}
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+  <FiCalendar />
+  <span>
+    {product.createdAt
+      ? new Date(product.createdAt).toLocaleString("fr-FR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Date inconnue"}
+  </span>
+</div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(product.id);
+          }}
+          className="mt-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded flex items-center gap-2 z-20 relative"
+        >
+          <FiTrash2 />
           Supprimer
         </button>
       </div>
     </div>
   );
 }
-

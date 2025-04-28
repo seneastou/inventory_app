@@ -43,11 +43,12 @@ export default function EditProductPage() {
     }
   }, []);
 
-  const handleSubmit = async (updatedProduct: Omit<Product, "createdat">) => {
+  const handleSubmit = async (updatedProduct: Omit<Product, "createdAt">) => {
     try {
       await updateProduct({ 
         ...updatedProduct, 
-        id: Number(id), 
+        id: id,
+        userId: user?.id || '', 
       });
       router.push("/products"); // Rediriger vers la liste des produits après la mise à jour
     } catch (error) {

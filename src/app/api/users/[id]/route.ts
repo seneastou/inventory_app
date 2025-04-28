@@ -3,11 +3,10 @@ import { Pool } from "pg";
 
 // Configurer la connexion à PostgreSQL
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "inventaire",
-  password: "scorpion",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 
@@ -16,7 +15,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const { id } = params;
 
   try {
-    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    await pool.query('DELETE FROM "User" WHERE id = $1', [id]);
     return NextResponse.json({ message: "Utilisateur supprimé avec succès" }, { status: 200 });
   } catch (error) {
     console.error("Erreur lors de la suppression de l'utilisateur :", error);
@@ -28,21 +27,19 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 }
 
 // Méthode PUT - Modifier un utilisateur
-export async function PUT(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
   const body = await req.json();
-  const { id, name, email, role } = body;
+  const { role } = body;
 
-  if (!id || !name || !email || !role) {
-    return NextResponse.json(
-      { error: "Tous les champs sont obligatoires" },
-      { status: 400 }
-    );
+  if (!role) {
+    return NextResponse.json({ error: "Le rôle est requis" }, { status: 400 });
   }
 
   try {
     const result = await pool.query(
-      "UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4 RETURNING *",
-      [name, email, role, id]
+      'UPDATE "User" SET role = $1 WHERE id = $2 RETURNING *',
+      [role, id]
     );
     return NextResponse.json(result.rows[0], { status: 200 });
   } catch (error) {
@@ -66,7 +63,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await pool.query("SELECT * FROM users WHERE id = $1", [
+    const result = await pool.query('SELECT * FROM "User" WHERE id = $1', [
       id,
     ]);
     if (result.rows.length === 0) {

@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 
-// Configurer la connexion à PostgreSQL
+// Connexion PostgreSQL (Railway friendly)
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "inventaire",
-  password: "scorpion",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
-// Méthode GET - Récupérer tous les produits avec le nom de la catégorie
+// GET - Récupérer tous les produits avec leur catégorie
 export async function GET() {
   try {
     const result = await pool.query(`
-      SELECT p.*, c.name as categoryname 
-      FROM products p 
-      JOIN categories c ON p.category_id = c.id
+      SELECT p.*, c.name AS categoryName 
+      FROM "Product" p 
+      JOIN "Category" c ON p."categoryId" = c.id
     `);
-    return NextResponse.json(result.rows || []);
+    const products = result.rows.map((p) => ({
+      ...p,
+      createdAt: p.createdAt?.toISOString(), // 🔥 conversion ici
+    }));
+
+    return NextResponse.json(products);
   } catch (error) {
     console.error("Erreur lors de la récupération des produits :", error);
     return NextResponse.json(
@@ -28,14 +30,21 @@ export async function GET() {
   }
 }
 
-
-// Méthode POST - Ajouter un nouveau produit avec gestion de la catégorie
-
+//  POST - Ajouter un produit
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, description, price, instock, categoryname, userid } = body;
-  console.log(body);
 
+  // Déstructuration avec alias vers minuscule
+  const {
+    name,
+    description,
+    price,
+    inStock: instock,
+    categoryName: categoryname,
+    userId: userid
+  } = body;
+
+  // Validation
   if (!name || !description || !price || !categoryname || !userid) {
     return NextResponse.json(
       { error: "Tous les champs sont obligatoires" },
@@ -44,33 +53,37 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Vérifier si la catégorie existe déjà dans la base de données
+    // Vérifier si la catégorie existe déjà
     const categoryResult = await pool.query(
-      "SELECT id FROM categories WHERE name = $1",
+      `SELECT id FROM "Category" WHERE name = $1`,
       [categoryname]
     );
 
-    let category_id;
+    let categoryid;
 
-    // Si la catégorie existe, utiliser son ID
     if (categoryResult.rows.length > 0) {
-      category_id = categoryResult.rows[0].id;
+      categoryid = categoryResult.rows[0].id;
     } else {
-      // Si la catégorie n'existe pas, la créer
+      // Créer la catégorie si elle n'existe pas
       const newCategory = await pool.query(
-        "INSERT INTO categories (name) VALUES ($1) RETURNING id",
+        `INSERT INTO "Category" (name) VALUES ($1) RETURNING id`,
         [categoryname]
       );
-      category_id = newCategory.rows[0].id; // Récupérer l'ID de la nouvelle catégorie
+      categoryid = newCategory.rows[0].id;
     }
 
-    // Insérer le nouveau produit avec l'ID de la catégorie récupérée ou créée
+    // Insérer le produit
     const result = await pool.query(
-      "INSERT INTO products (name, description, price, instock, category_id, userid, createdat) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *",
-      [name, description, price, instock, category_id, userid]
+      `INSERT INTO "Product" (name, description, price, "inStock", "categoryId", "userId", "createdAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *`,
+      [name, description, price, instock, categoryid, userid]
     );
 
-    return NextResponse.json(result.rows[0], { status: 201 });
+    // Convertir la date en ISO
+    const product = result.rows[0];
+    product.createdAt = product.createdAt?.toISOString();
+
+    return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error("Erreur lors de l'ajout du produit :", error);
     return NextResponse.json(
@@ -79,3 +92,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

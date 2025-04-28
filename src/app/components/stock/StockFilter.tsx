@@ -14,7 +14,7 @@ export default function StockFilter({ onFilterChange }: StockFilterProps) {
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-white">
+      <label className="block text-sm font-medium text-black">
         Filtrer par disponibilité
       </label>
       <select

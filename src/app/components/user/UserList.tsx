@@ -32,7 +32,6 @@ export default function UserList({ onUserClick, users, onDeleteUser}: UserListPr
     const updatedUser = { ...user, role: role[user.id] || user.role };
     try {
       await updateUser(updatedUser);
-      alert("Rôle mis à jour avec succès !");
     } catch (error) {
       console.error("Erreur lors de la mise à jour du rôle :", error);
     }
@@ -42,7 +41,6 @@ export default function UserList({ onUserClick, users, onDeleteUser}: UserListPr
   const handleDeleteUser = async (user: User) => {
     try {
       await onDeleteUser(user.id);
-      alert("Utilisateur supprimé avec succès !");
     } catch (error) {
       console.error("Erreur lors de la suppression de l'utilisateur :", error);
     }
@@ -62,7 +60,7 @@ export default function UserList({ onUserClick, users, onDeleteUser}: UserListPr
       <table className="min-w-full table-auto">
         <thead>
           <tr className="items-center justify-between text-gray-700">
-            <th>Utilisateur</th>
+            <th>Utilisateurs</th>
             <th>Rôle</th>
             <th>Actions</th>
           </tr>
@@ -87,7 +85,7 @@ export default function UserList({ onUserClick, users, onDeleteUser}: UserListPr
                   className="border border-gray-300 text-gray-700 rounded-md px-2 py-1"
                   style={{ width: "100%" }} // Alignement sous "Rôle"
                 >
-                  <option value="user">Utilisateur</option>
+                  <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
               </td>

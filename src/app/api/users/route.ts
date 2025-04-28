@@ -3,17 +3,16 @@ import { Pool } from "pg";
 
 // Configurer la connexion à PostgreSQL
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "inventaire",
-  password: "scorpion",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 // Méthode GET - Récupérer tous les utilisateurs
 export async function GET() {
   try {
-    const result = await pool.query("SELECT * FROM users");
+    const result = await pool.query('SELECT * FROM "User"');
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -34,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // Vérifier si l'utilisateur existe déjà avec cet email
-    const userExist = await pool.query("SELECT * FROM users WHERE email = $1", [
+    const userExist = await pool.query('SELECT * FROM "User" WHERE email = $1', [
       email,
     ]);
 
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await pool.query(
-      "INSERT INTO users (name, email, role) VALUES ($1, $2, $3) RETURNING *",
+      'INSERT INTO "User" (name, email, role) VALUES ($1, $2, $3) RETURNING *',
       [name, email, role]
     );
 

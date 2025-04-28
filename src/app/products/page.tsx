@@ -7,6 +7,7 @@ import CategoryFilter from "../components/category/CategoryFilter";
 import StockFilter from "../components/stock/StockFilter";
 import { useProducts } from "../hooks/useProducts"; // Utiliser le hook des produits
 import { useCategories } from "../hooks/useCategories"; // Utiliser le hook des catégories
+import { ArrowLeft } from "lucide-react";
 
 export default function ProductPage() {
   const { products, fetchProducts } = useProducts(); // Hook pour gérer les produits
@@ -39,13 +40,13 @@ export default function ProductPage() {
 
       if (selectedCategoryName) {
         filtered = filtered.filter(
-          (product) => product.categoryname === selectedCategoryName
+          (product) => product.categoryName === selectedCategoryName
         ); // Filtrer par nom de catégorie
       }
 
       if (stockFilter !== null) {
         filtered = filtered.filter(
-          (product) => product.instock === stockFilter
+          (product) => product.inStock === stockFilter
         );
       }
 
@@ -59,45 +60,45 @@ export default function ProductPage() {
     setSelectedCategoryName(categoryName); // Utiliser le nom de la catégorie
   };
 
-  const handleStockFilter = (instock: boolean | null) => {
-    setStockFilter(instock);
+  const handleStockFilter = (inStock: boolean | null) => {
+    setStockFilter(inStock);
   };
 
   return (
     <main>
-      <Link href="/users" className="text-blue-600 hover:underline">
-        Retour à la liste des utilisateurs
-      </Link>
+      <Link href="/users" className="flex items-center text-blue-600 hover:underline">
+  <ArrowLeft className="w-5 h-5 mr-6" />
+  
+</Link>
       <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-2xl text-center font-bold mb-6">
-          Liste des produits
-        </h1>
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+  Liste des produits
+</h1>
 
-        {/* Disposition des filtres et du bouton */}
-        <div className="mb-6 flex justify-between items-center">
-          {/* Filtrer par catégories à gauche */}
-          <div className="w-1/3">
-            <CategoryFilter
-              categories={Array.isArray(categories) ? categories : []}
-              onFilterChange={handleCategoryFilter}
-            />
-          </div>
+        <div className="mb-10 flex flex-col md:flex-row items-center justify-between gap-4">
+  {/* Filtrer par catégories à gauche */}
+  <div className="w-full md:w-1/3">
+    <CategoryFilter
+      categories={Array.isArray(categories) ? categories : []}
+      onFilterChange={handleCategoryFilter}
+    />
+  </div>
 
-          {/* Bouton Ajouter au centre */}
-          <div className="w-1/3">
-            <Link
-              href="/products/new"
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Ajouter un produit
-            </Link>
-          </div>
+  {/* Bouton Ajouter au centre */}
+  <div className="w-full md:w-1/3 flex justify-center">
+    <Link
+      href="/products/new"
+      className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600 transition"
+    >
+      ➕ Ajouter un produit
+    </Link>
+  </div>
 
-          {/* Filtrer par disponibilité à droite */}
-          <div className="w-1/6 text-right">
-            <StockFilter onFilterChange={handleStockFilter} />
-          </div>
-        </div>
+  {/* Filtrer par disponibilité à droite */}
+  <div className="w-full md:w-1/3 flex justify-end">
+    <StockFilter onFilterChange={handleStockFilter} />
+  </div>
+</div>
 
         {/* Liste des produits filtrés */}
         {Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (

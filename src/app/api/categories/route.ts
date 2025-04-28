@@ -4,17 +4,14 @@ import { Pool } from "pg";
 
 // Configurer la connexion à PostgreSQL
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "inventaire",
-  password: "scorpion",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 // Méthode GET - Récupérer toutes les catégories
 export async function GET() {
   try {
-    const result = await pool.query("SELECT * FROM categories");
+    const result = await pool.query('SELECT * FROM "Category"');
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -39,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await pool.query(
-      "INSERT INTO categories (name) VALUES ($1) RETURNING *",
+      'INSERT INTO "Category" (name) VALUES ($1) RETURNING *',
       [name]
     );
     return NextResponse.json(result.rows[0], { status: 201 });

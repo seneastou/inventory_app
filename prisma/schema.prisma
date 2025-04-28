@@ -12,3 +12,48 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String
+  email     String     @unique
+  role      Role
+  products  Product[]  @relation("UserProducts")
+  histories History[]
+}
+
+model Product {
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String
+  description String
+  price       Float
+  inStock     Boolean
+  createdAt   DateTime   @default(now())
+  user        User       @relation("UserProducts", fields: [userId], references: [id])
+  userId      String     @db.Uuid
+  category    Category   @relation(fields: [categoryId], references: [id])
+  categoryId  String     @db.Uuid
+  histories   History[]
+}
+
+model Category {
+  id       String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String     @unique
+  products Product[]
+}
+
+model History {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  action    String
+  quantity  Int?
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid
+}
+
+enum Role {
+  admin
+  user
+}

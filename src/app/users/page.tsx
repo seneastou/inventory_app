@@ -70,96 +70,110 @@ export default function UserManagementPage() {
   };
 
   return (
-    <main>
-      <h1 className="text-3xl text-center text-blue-700 font-bold mb-6">
-        Bienvenue dans l'application de gestion d'inventaire
-      </h1>
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-        <h1 className="text-2xl font-bold text-gray-700 mb-6">
-          Gestion des utilisateurs
-        </h1>
+    <main className="min-h-screen bg-sky-100 px-4 py-10">
+  {/* Header */}
+  <header className="max-w-4xl mx-auto mb-8">
+    <h1 className="text-3xl md:text-4xl font-bold text-center text-blue-700">
+      Bienvenue dans l'application de gestion d'inventaire
+    </h1>
+  </header>
 
-        {/* Formulaire pour ajouter un utilisateur */}
-        <form onSubmit={handleCreateUser} className="mb-6">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Nom</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md shadow-sm"
-            />
-          </div>
-          <div className="mb-4">
+  {/* Carte principale */}
+  <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md space-y-10">
+
+    {/* Section formulaire */}
+    <section>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+        Gestion des utilisateurs
+      </h2>
+      <form onSubmit={handleCreateUser} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Nom</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Rôle</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as "admin" | "user")}
+            className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md shadow"
+        >
+          ➕ Créer un utilisateur
+        </button>
+      </form>
+    </section>
+
+    {/* Section liste utilisateurs */}
+    <section>
+      <UserList
+        onUserClick={handleUserClick}
+        users={users}
+        onDeleteUser={deleteUser}
+      />
+    </section>
+  </div>
+
+  {/* Popup pour authentification */}
+  {showPopup && (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-96 max-w-full">
+        <h2 className="text-xl font-bold text-gray-700 mb-4">Vérifiez votre email</h2>
+        <form onSubmit={handleEmailSubmit} className="space-y-4">
+          <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
               required
-              className="mt-1 block w-full px-3 text-gray-700 py-2 border border-gray-300 rounded-md shadow-sm"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Rôle</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as "admin" | "user")}
-              className="mt-1 block w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md shadow-sm"
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPopup(false)}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
             >
-              <option value="user">Utilisateur</option>
-              <option value="admin">Admin</option>
-            </select>
+              Annuler
+            </button>
+            <button
+              type="submit"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
+            >
+              Confirmer
+            </button>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-md shadow hover:bg-indigo-700"
-          >
-            Créer un utilisateur
-          </button>
         </form>
-
-        {/* Composant pour afficher la liste des utilisateurs */}
-        <UserList onUserClick={handleUserClick} users={users} onDeleteUser={deleteUser} />
-
-        {/* Popup pour l'authentification par email */}
-        {showPopup && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center">
-            <div className="bg-white p-6 rounded shadow-md">
-              <h2 className="text-xl font-bold text-gray-700 mb-4">
-                Vérifiez l'email pour accéder
-              </h2>
-              <form onSubmit={handleEmailSubmit}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    required
-                    className="mt-1 block w-full text-gray-700 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-                  />
-                </div>
-                {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-                <button
-                  type="submit"
-                  className="bg-green-500 text-white py-2 px-4 rounded-md"
-                >
-                  Confirmer
-                </button>
-                <button
-                  type="button"
-                  className="bg-red-500 justify-end text-white py-2 px-4 rounded-md ml-2"
-                  onClick={() => setShowPopup(false)} // Fermer le popup
-                >
-                  Annuler
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
-    </main>
+    </div>
+  )}
+</main>
+
   );
 }

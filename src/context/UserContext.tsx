@@ -8,7 +8,7 @@ import {
 } from "react";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "admin" | "user";
@@ -20,6 +20,7 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // Hook personnalisé pour utiliser le contexte utilisateur
 export const useUser = () => {
@@ -38,7 +39,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/auth/me"); // Assurez-vous que cette route existe
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`); // Assurez-vous que cette route existe
         if (response.ok) {
           const userData = await response.json();
           setUser(userData); // Mettre à jour l'utilisateur dans l'état
