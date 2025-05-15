@@ -104,7 +104,7 @@ export default function ProductPage() {
         {Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
           <ProductList
             products={filteredProducts}
-            onDelete={(id: number) => {
+            onDelete={(id: string) => {
               setFilteredProducts(filteredProducts.filter(product => product.id !== id));
             }} 
           />

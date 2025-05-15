@@ -2,7 +2,7 @@ import { useState } from "react";
 import ProductCard, { Product } from "./ProductCard";
 import Pagination from "../pagination/Pagination"; 
 import { useProducts } from "../../hooks/useProducts";
-import toast from "react-hot-toast";
+
 
 interface ProductListProps {
   products: Product[];

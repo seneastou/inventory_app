@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   try {
     const result = await pool.query(
-      `SELECT p.*, c.name as categoryName
+      `SELECT p.*, c.name as "categoryName"
        FROM "Product" p
        JOIN "Category" c ON p."categoryId" = c.id
        WHERE p.id = $1`,
@@ -56,13 +56,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     name,
     description,
     price,
-    inStock: instock,
-    categoryName: categoryname,
+    inStock,
+    categoryName,
     userId: userid,
   } = body;
 
   // Validation
-  if (!id || !name || !description || !price || !categoryname || !userid) {
+  if (!id || !name || !description || !price || !categoryName || !userid) {
     return NextResponse.json({ error: "Tous les champs sont obligatoires" }, { status: 400 });
   }
 
@@ -70,7 +70,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Vérifier si la catégorie existe
     const categoryResult = await pool.query(
       `SELECT id FROM "Category" WHERE name = $1`,
-      [categoryname]
+      [categoryName]
     );
 
     let categoryid = categoryResult.rows[0]?.id;
@@ -78,7 +78,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (!categoryid) {
       const newCategory = await pool.query(
         `INSERT INTO "Category" (name) VALUES ($1) RETURNING id`,
-        [categoryname]
+        [categoryName]
       );
       categoryid = newCategory.rows[0].id;
     }
@@ -89,11 +89,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
        SET name = $1, description = $2, price = $3, "inStock" = $4, "categoryId" = $5, "userId" = $6
        WHERE id = $7
        RETURNING *`,
-      [name, description, price, instock, categoryid, userid, id]
+      [name, description, price, inStock, categoryid, userid, id]
     );
 
     const product = result.rows[0];
     product.createdAt = product.createdAt?.toISOString();
+    product.categoryName = categoryName;
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {

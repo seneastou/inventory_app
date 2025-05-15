@@ -11,10 +11,11 @@ const pool = new Pool({
 export async function GET() {
   try {
     const result = await pool.query(`
-      SELECT p.*, c.name AS categoryName 
+      SELECT p.*, c.name AS "categoryName" 
       FROM "Product" p 
       JOIN "Category" c ON p."categoryId" = c.id
     `);
+
     const products = result.rows.map((p) => ({
       ...p,
       createdAt: p.createdAt?.toISOString(), // 🔥 conversion ici
@@ -30,22 +31,22 @@ export async function GET() {
   }
 }
 
-//  POST - Ajouter un produit
+// POST - Ajouter un produit
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  // Déstructuration avec alias vers minuscule
+  // Pas de renommage ici — garder la même casse que le front
   const {
     name,
     description,
     price,
-    inStock: instock,
-    categoryName: categoryname,
-    userId: userid
+    inStock,
+    categoryName,
+    userId
   } = body;
 
   // Validation
-  if (!name || !description || !price || !categoryname || !userid) {
+  if (!name || !description || !price || !categoryName || !userId) {
     return NextResponse.json(
       { error: "Tous les champs sont obligatoires" },
       { status: 400 }
@@ -56,32 +57,33 @@ export async function POST(req: NextRequest) {
     // Vérifier si la catégorie existe déjà
     const categoryResult = await pool.query(
       `SELECT id FROM "Category" WHERE name = $1`,
-      [categoryname]
+      [categoryName]
     );
 
-    let categoryid;
+    let categoryId;
 
     if (categoryResult.rows.length > 0) {
-      categoryid = categoryResult.rows[0].id;
+      categoryId = categoryResult.rows[0].id;
     } else {
       // Créer la catégorie si elle n'existe pas
       const newCategory = await pool.query(
         `INSERT INTO "Category" (name) VALUES ($1) RETURNING id`,
-        [categoryname]
+        [categoryName]
       );
-      categoryid = newCategory.rows[0].id;
+      categoryId = newCategory.rows[0].id;
     }
 
     // Insérer le produit
     const result = await pool.query(
       `INSERT INTO "Product" (name, description, price, "inStock", "categoryId", "userId", "createdAt") 
        VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *`,
-      [name, description, price, instock, categoryid, userid]
+      [name, description, price, inStock, categoryId, userId]
     );
 
-    // Convertir la date en ISO
+    // Convertir la date et ajouter le nom de la catégorie
     const product = result.rows[0];
     product.createdAt = product.createdAt?.toISOString();
+    product.categoryName = categoryName;
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
@@ -92,4 +94,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

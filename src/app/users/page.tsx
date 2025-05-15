@@ -58,16 +58,30 @@ export default function UserManagementPage() {
   };
 
   // Valider l'email et rediriger vers la page des produits
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (emailInput === selectedUser?.email) {
-      setUser(selectedUser); // Stocker l'utilisateur authentifié dans le contexte
-      window.localStorage.setItem("user", JSON.stringify(selectedUser)); // Option pour stocker l'utilisateur localement
-      window.location.href = "/products"; // Redirection vers la page des produits
-    } else {
-      setErrorMessage("Email incorrect");
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+  
+    if (!selectedUser) return
+  
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput }),
+      })
+  
+      if (res.ok) {
+        const { user } = await res.json()
+        setUser(user) // Contexte
+        window.location.href = "/products"
+      } else {
+        setErrorMessage("Email incorrect ou utilisateur inactif")
+      }
+    } catch (err) {
+      console.error("Erreur connexion :", err)
+      setErrorMessage("Erreur de connexion")
     }
-  };
+  }
 
   return (
     <main className="min-h-screen bg-sky-100 px-4 py-10">

@@ -7,6 +7,8 @@ import { useProducts } from '../../../hooks/useProducts';
 import { useCategories } from '../../../hooks/useCategories';
 import ProductForm from '../../../components/product/ProductForm';
 import { useUser } from "../../../../context/UserContext";
+import Link from 'next/link';
+import { ArrowLeft } from "lucide-react";
 
 
 export default function EditProductPage() {
@@ -60,6 +62,12 @@ export default function EditProductPage() {
   }
 
   return (
+    <main>
+      <Link href="/products" className="flex items-center text-blue-600 hover:underline">
+  <ArrowLeft className="w-5 h-5 mr-6" />
+  
+</Link>
+  
     <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl text-center text-black font-bold mb-4">Modifier le produit</h1>
 
@@ -71,5 +79,6 @@ export default function EditProductPage() {
         initialProduct={product} // Passer les données actuelles du produit au formulaire
       />
     </div>
+    </main>
   );
 }

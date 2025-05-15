@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Product } from '@/app/hooks/useProducts'; // Assurez-vous que ce type est bien exporté
 import Link from 'next/link';
+import { ArrowLeft } from "lucide-react";
 
 export default function ProductDetailPage() {
   const params = useParams(); // Récupérer les paramètres de l'URL
@@ -12,13 +13,14 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // Récupérer les détails du produit
   useEffect(() => {
     if (id) {
       const fetchProduct = async () => {
         try {
-          const res = await fetch(`http://localhost:3000/api/products/${id}`);
+          const res = await fetch(`${baseUrl}/api/products/${id}`);
           if (!res.ok) {
             throw new Error('Erreur lors de la récupération du produit');
           }
@@ -49,11 +51,10 @@ export default function ProductDetailPage() {
 
   return (
     <main>
-      <Link href="/products">
-          <button className="text-blue-600 hover:underline">
-            Retour à la liste des produits
-          </button>
-        </Link>
+      <Link href="/products" className="flex items-center text-blue-600 hover:underline">
+  <ArrowLeft className="w-5 h-5 mr-6" />
+  
+</Link>
       <h1 className='text-bold text-center mt-4 text-2xl'>Détails du produit</h1>
     <div className="max-w-xl text-center mx-auto p-6 bg-white text-gray-700 shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-4">{product.name}</h1>

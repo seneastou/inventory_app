@@ -15,12 +15,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const { id } = params;
 
   try {
-    await pool.query('DELETE FROM "User" WHERE id = $1', [id]);
-    return NextResponse.json({ message: "Utilisateur supprimé avec succès" }, { status: 200 });
+    await pool.query(
+      'UPDATE "User" SET "isActive" = false WHERE id = $1',
+      [id]
+    );
+    return NextResponse.json({ message: "Utilisateur désactivé avec succès" }, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur :", error);
+    console.error("Erreur lors de la désactivation de l'utilisateur :", error);
     return NextResponse.json(
-      { error: "Erreur lors de la suppression de users"},
+      { error: "Erreur lors de la désactivation de l'utilisateur" },
       { status: 500 }
     );
   }

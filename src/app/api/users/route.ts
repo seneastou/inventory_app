@@ -12,7 +12,7 @@ const pool = new Pool({
 // Méthode GET - Récupérer tous les utilisateurs
 export async function GET() {
   try {
-    const result = await pool.query('SELECT * FROM "User"');
+    const result = await pool.query('SELECT * FROM "User" WHERE "isActive" = true');
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     return NextResponse.json(

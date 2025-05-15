@@ -1,6 +1,7 @@
 import './globals.css';  // Styles globaux
 import { UserProvider } from '../context/UserContext';  // Importer le UserContext
 import { Toaster } from 'react-hot-toast';
+import NavBar from './components/menu/NavBar';  // Importer la barre de navigation
 
 export const metadata = {
   title: 'Gestion d\'inventaire',
@@ -13,7 +14,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <UserProvider>
         <Toaster position="top-right" />
-          {children}  {/* Toutes les pages seront rendues ici */}
+          <NavBar /> {/* ← Menu global */}
+          <main className="p-6">{children}</main>
         </UserProvider>
       </body>
     </html>

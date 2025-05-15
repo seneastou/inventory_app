@@ -61,7 +61,7 @@ export default function ProductForm({
     }
 
     const updatedProduct = {
-      id: initialProduct?.id ?? 0,
+      id: initialProduct?.id ?? "",
       name,
       description,
       price,

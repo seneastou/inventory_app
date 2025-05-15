@@ -6,6 +6,7 @@ import { useCategories } from "../../hooks/useCategories"; // Assurez-vous que c
 import ProductForm from "../../components/product/ProductForm";
 import { Product } from "../../hooks/useProducts";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function NewProductPage() {
@@ -46,9 +47,10 @@ export default function NewProductPage() {
 
   return (
     <main>
-      <Link href="/products" className="text-blue-600 hover:underline">
-        Retour à la liste des produits
-      </Link>
+      <Link href="/products" className="flex items-center text-blue-600 hover:underline">
+  <ArrowLeft className="w-5 h-5 mr-6" />
+  
+</Link>
       <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
         <h1 className="text-2xl text-black font-bold mb-4">
           Ajouter un nouveau produit
