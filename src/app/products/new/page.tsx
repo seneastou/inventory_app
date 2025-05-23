@@ -19,26 +19,22 @@ export default function NewProductPage() {
     fetchCategories(); // Récupérer les catégories lors du montage
   }, []);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
   const handleSubmit = async (
-    newProduct: Omit<Product, "id" | "createdAt" | "userId"> 
+    newProduct: Omit<Product, "id" | "createdAt" | "userId">
   ) => {
     try {
-      if (!user) {
-        console.error("Utilisateur non connecté");
+      if (!user || !user.companyId) {
+        console.error("Utilisateur non connecté ou sans entreprise");
         return;
       }
-
-      const productWithUser = { ...newProduct, userId: String(user.id), }; // Ajouter userId
+  
+      const productWithUser = {
+        ...newProduct,
+        userId: String(user.id),
+        companyId: user.companyId,
+      };
+  
       await addProduct(productWithUser);
-
-      // Rediriger vers la page des produits après l'ajout réussi
       router.push("/products");
     } catch (error) {
       console.error("Erreur lors de l'ajout du produit", error);

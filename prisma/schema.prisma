@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -14,18 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Company {
+  id       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String
+  users    User[]
+  products Product[]
+}
+
 model User {
-  id        String     @id @default(uuid()) @db.Uuid
+  id        String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name      String
   email     String     @unique
   role      Role
   isActive  Boolean    @default(true)
+  company    Company   @relation(fields: [companyId], references: [id])
+  companyId  String    @db.Uuid
   products  Product[]  @relation("UserProducts")
   histories History[]
 }
 
 model Product {
-  id          String     @id @default(uuid()) @db.Uuid
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
   description String
   price       Float
@@ -35,21 +43,23 @@ model Product {
   userId      String     @db.Uuid
   category    Category   @relation(fields: [categoryId], references: [id])
   categoryId  String     @db.Uuid
-  // ❌ Plus de relation vers History ici
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  String   @db.Uuid
 }
 
 model Category {
-  id       String     @id @default(uuid()) @db.Uuid
+  id       String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name     String     @unique
   products Product[]
 }
 
 model History {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   action    String
   quantity  Int?
   createdAt DateTime @default(now())
-  productId String?  @db.Uuid  // ✅ Lien logique, sans contrainte FK
+  productId String?  @db.Uuid  
+  productName  String? 
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @db.Uuid
 }

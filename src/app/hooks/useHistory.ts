@@ -6,6 +6,7 @@ export interface HistoryEntry {
   quantity?: number
   userId: string
   productId?: string
+  productName?: string
   createdAt?: string
   user?: { name: string }
   product?: { name: string }

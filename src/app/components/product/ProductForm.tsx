@@ -100,6 +100,7 @@ export default function ProductForm({
           <label className="block text-sm font-medium text-gray-700">Prix</label>
           <input
             type="number"
+            step="0.01"
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
             required

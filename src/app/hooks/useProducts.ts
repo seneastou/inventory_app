@@ -24,10 +24,12 @@ export function useProducts() {
   const { user } = useUser();
   const { addHistory } = useHistory();
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (companyId?: string) => {
+    if (!companyId) return; // ✅ Sécurité
+  
     setLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/api/products`);
+      const res = await fetch(`${baseUrl}/api/products?companyId=${companyId}`);
       if (res.ok) {
         const data = await res.json();
         const productsWithDate: Product[] = data.map((product: any) => ({
@@ -40,12 +42,8 @@ export function useProducts() {
           userId: String(product.userId),
           createdAt: String(product.createdAt),
         }));
-
-        if (Array.isArray(productsWithDate)) {
-          setProducts(productsWithDate);
-        } else {
-          setError("La réponse de l'API des produits n'est pas un tableau");
-        }
+  
+        setProducts(productsWithDate);
       } else {
         setError("Erreur lors de la récupération des produits");
       }
@@ -55,15 +53,18 @@ export function useProducts() {
       setLoading(false);
     }
   };
+  
 
   const addProduct = async (product: Omit<Product, "id" | "createdAt">) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${baseUrl}/api/products`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
-      });
+    if (!user?.companyId) return;
+
+  setLoading(true);
+  try {
+    const res = await fetch(`${baseUrl}/api/products`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...product, companyId: user.companyId }),
+    });
       const data = await res.json();
 
       if (res.ok) {
@@ -75,6 +76,7 @@ export function useProducts() {
             quantity: 1,
             userId: user.id,
             productId: data.id,
+            productName: product.name,
           });
         }
       } else {
@@ -105,6 +107,7 @@ export function useProducts() {
             action: "Modification de produit",
             userId: user.id,
             productId: product.id,
+            productName: product.name,
           });
         }
       } else {
@@ -125,14 +128,18 @@ export function useProducts() {
         method: "DELETE",
       });
       if (res.ok) {
+        const productToDelete = products.find((p) => p.id === id);
         toast.success("Produit supprimé avec succès !");
         setProducts((prev) => prev.filter((product) => product.id !== id));
         if (user) {
-          await addHistory({
-            action: "Suppression de produit",
-            userId: user.id,
-            productId: id,
-          });
+          if (productToDelete) {
+            await addHistory({
+              action: "Suppression de produit",
+              userId: user.id,
+              productId: id,
+              productName: productToDelete.name,
+            });
+          }
         }
       } else {
         setError("Erreur lors de la suppression du produit");

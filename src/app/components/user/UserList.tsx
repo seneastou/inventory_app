@@ -3,21 +3,24 @@ import { useState } from "react";
 import { useUsers } from "../../hooks/useUsers"; // Importer le hook useUsers
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "admin" | "user";
+  isActive: boolean;
+  companyId: string;
+  companyName: string;
 }
 
 interface UserListProps {
   onUserClick: (user: User) => void;
   users: User[];
-  onDeleteUser: (id: number) => Promise<void>;
+  onDeleteUser: (id: string) => Promise<void>;
 }
 
 export default function UserList({ onUserClick, users, onDeleteUser}: UserListProps) {
   const { updateUser, loading, error } = useUsers(); 
-  const [role, setRole] = useState<{ [key: number]: "admin" | "user" }>({});
+  const [role, setRole] = useState<{ [key: string]: "admin" | "user" }>({});
 
   // Gérer le changement de rôle d'un utilisateur
   const handleRoleChange = (user: User, newRole: "admin" | "user") => {

@@ -6,10 +6,20 @@ import { useUser } from "../../context/UserContext";
 import { useHistory } from "./useHistory";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "admin" | "user";
+  isActive: boolean;
+  companyId: string;
+  companyName: string;
+}
+
+interface NewUser {
+  name: string;
+  email: string;
+  role: "admin" | "user";
+  companyName: string;
 }
 
 export function useUsers() {
@@ -38,7 +48,7 @@ export function useUsers() {
     }
   };
 
-  const addUser = async (user: Omit<User, "id">) => {
+  const addUser = async (user: NewUser): Promise<User | null> => {
     setLoading(true);
     console.log("Données envoyées à l'API /users :", user); 
     try {
@@ -108,7 +118,7 @@ export function useUsers() {
     }
   };
 
-  const deleteUser = async (id: number) => {
+  const deleteUser = async (id: string) => {
     setLoading(true);
     try {
       const res = await fetch(`${baseUrl}/api/users/${id}`, {

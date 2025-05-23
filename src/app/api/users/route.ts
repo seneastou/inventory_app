@@ -25,7 +25,7 @@ export async function GET() {
 // Méthode POST - Ajouter un nouvel utilisateur
 export async function POST(req: NextRequest) {
   const body = await req.json(); // Récupérer le corps de la requête
-  const { name, email, role } = body;
+  const { name, email, role, companyName } = body;
 
   if (!email) {
     return NextResponse.json({ error: "Email manquant" }, { status: 400 });
@@ -42,6 +42,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(userExist.rows[0], { status: 201 });
     }
 
+    const companyResult = await pool.query(
+      'SELECT id FROM "Company" WHERE name = $1',
+      [companyName]
+    );
+
+    let companyId: string;
+
+    if (companyResult.rows.length > 0) {
+      companyId = companyResult.rows[0].id;
+    } else {
+      // Créer la société si elle n'existe pas
+      const newCompany = await pool.query(
+        `INSERT INTO "Company" ( name) VALUES ($1) RETURNING id`,
+        [companyName]
+      );
+      companyId = newCompany.rows[0].id;
+    }
+
     // Si l'utilisateur n'existe pas, ajouter un nouvel utilisateur
     if (!name || !role) {
       return NextResponse.json(
@@ -51,8 +69,14 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await pool.query(
-      'INSERT INTO "User" (name, email, role) VALUES ($1, $2, $3) RETURNING *',
-      [name, email, role]
+      'INSERT INTO "User" (name, email, role, "companyId") VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, email, role, companyId]
+    );
+
+    await pool.query(
+      `INSERT INTO "History" (action, "createdAt", "userId", "productId", quantity)
+       VALUES ($1, NOW(), $2, NULL, NULL)`,
+      ["Utilisateur créé", result.rows[0].id]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });
@@ -64,4 +88,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
 

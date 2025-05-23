@@ -19,6 +19,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       'UPDATE "User" SET "isActive" = false WHERE id = $1',
       [id]
     );
+
+    await pool.query(
+      `INSERT INTO "History" (id, action, quantity, "createdAt", "userId", "productId")
+       VALUES (uuid_generate_v4(), $1, NULL, NOW(), $2, NULL)`,
+      ["Utilisateur désactivé", id]
+    );
+
     return NextResponse.json({ message: "Utilisateur désactivé avec succès" }, { status: 200 });
   } catch (error) {
     console.error("Erreur lors de la désactivation de l'utilisateur :", error);

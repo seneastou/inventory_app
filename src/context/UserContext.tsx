@@ -12,17 +12,19 @@ interface User {
   name: string;
   email: string;
   role: "admin" | "user";
+  isActive: boolean;
+  companyId?: string;
 }
 
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
+  loadingUser: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-// Hook personnalisé pour utiliser le contexte utilisateur
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
@@ -31,35 +33,62 @@ export const useUser = () => {
   return context;
 };
 
-// Provider pour fournir le contexte utilisateur à l'application
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Charger l'utilisateur depuis l'API au montage du composant
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`); // Assurez-vous que cette route existe
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData); // Mettre à jour l'utilisateur dans l'état
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/auth/me`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", 
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData?.isActive) {
+          setUser(userData);
         } else {
-          setUser(null); // Aucun utilisateur connecté
+          setUser(null);
         }
-      } catch (error) {
-        console.error("Erreur lors de la récupération de l'utilisateur :", error);
-        setUser(null); // Mettre à jour l'état en cas d'erreur
+      } else {
+        setUser(null);
       }
-    };
+    } catch (error) {
+      console.error("Erreur lors de la récupération de l'utilisateur :", error);
+      setUser(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
 
-    fetchCurrentUser(); // Appel au backend pour récupérer l'utilisateur
+  // ✅ 1. Charger depuis localStorage si possible
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setLoadingUser(false);
+    } else {
+      fetchCurrentUser();
+    }
   }, []);
 
+  // ✅ 2. Mettre à jour le stockage
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, loadingUser }}>
       {children}
     </UserContext.Provider>
   );
 };
 
 export default UserProvider;
+export { UserContext };
+
